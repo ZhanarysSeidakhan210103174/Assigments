@@ -1,0 +1,78 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+
+public class HelloApplication extends Application {
+    Slider slTime = new Slider();
+    private String totalTime = "";
+    @Override
+    public void start(Stage primaryStage) throws FileNotFoundException {
+        File mediaFile = new File("C:\\Users\\user\\Downloads\\Rick Astley - Never Gonna Give You Up (Official Music Video).mp4");
+        Media media = new Media(mediaFile.toURI().toString());
+        MediaPlayer mediaPlayer = new MediaPlayer(media);
+        MediaView mediaView = new MediaView(mediaPlayer);
+        mediaView.setFitWidth(650);
+        mediaView.setFitHeight(500);
+        Button playb = new Button("|>");
+        playb.setOnAction(e -> {
+            if (playb.getText().equals("|>")) {
+                mediaPlayer.play();
+                playb.setText("||");
+            } else {
+                mediaPlayer.pause();
+                playb.setText("|>");
+            }
+        });
+        Button re = new Button("<<");
+        re.setOnAction(e ->mediaPlayer.seek(Duration.ZERO));
+        Slider slVolume = new Slider();
+        slVolume.setPrefWidth(150);
+        slVolume.setMaxWidth(Region.USE_PREF_SIZE);
+        slVolume.setMinWidth(30);
+        slVolume.setValue(50);
+        mediaPlayer.volumeProperty().bind(
+                slVolume.valueProperty().divide(100));
+        HBox hBox = new HBox(10);
+        hBox.setAlignment(Pos.CENTER);
+        Label lblVideoTime = new Label(getTimeFormat(0), slTime);
+        hBox.getChildren().addAll(playb, re,
+                new Label("Volume"), slVolume,new Label("Time"), lblVideoTime);
+        mediaPlayer.currentTimeProperty().addListener(e -> {
+            if (!slTime.isValueChanging()) {
+                slTime.setValue(mediaPlayer.getCurrentTime().toMillis());
+            }
+
+            lblVideoTime.setText(
+                    getTimeFormat(mediaPlayer.getCurrentTime().toMillis()) + "/" + totalTime);
+        });
+
+        slTime.valueProperty().addListener(ov -> {
+            if (slTime.isValueChanging()) {
+                mediaPlayer.seek(new Duration(slTime.getValue()));
+            }
+        });
+        BorderPane pane = new BorderPane();
+        pane.setCenter(mediaView);
+        pane.setBottom(hBox);
+        slTime.setPrefWidth(150);
+        mediaPlayer.play();
+        Scene scene = new Scene(pane,650,400);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+    }
+    private String getTimeFormat(double milliseconds) {
+        milliseconds /= 1000;
+        String seconds =  formatTwoDigits(milliseconds % 60);
+        milliseconds /= 60;
+        String minutes = formatTwoDigits(milliseconds % 60);
+        milliseconds /= 60;
+        String hours =  formatTwoDigits(milliseconds % 24);
+        return hours + ":" + minutes + ":" + seconds;
+    }
+
+    private String formatTwoDigits(double time) {
+        int intTime = (int) time;
+        return (intTime > 9) ? intTime + "" : "0" + intTime;
+    }
+}
