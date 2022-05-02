@@ -1,0 +1,23 @@
+public class Zz {
+
+    public static void main(String[] args) {
+        Integer[] li = new Integer[20];
+        for (int i = 0; i < li.length; i++) {
+            li[i] = i;
+        }
+        System.out.println(linearSearch(li, 1));
+        System.out.println(linearSearch(li, 10));
+        System.out.println(linearSearch(li, 30));
+    }
+
+    public static <E extends Comparable<E>> int linearSearch(E[] li, E value) {
+
+        for (int i = 0; i < li.length; i++) {
+            if (li[i].compareTo(value) == 0) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+}
